@@ -1,38 +1,6 @@
 var svg  = document.getElementsByTagName('svg')[0];
 var svgNS = svg.getAttribute('xmlns');
 
-function wrapText(text, maxWidth) {
-  substrings = text.split(' ');
-  var i = 0;
-  var output = [];
-  var current = "";
-
-  var testEl = addSVGElement('text', {"class":"labelText"});
-
-  while (i < substrings.length) {    
-    if (current.length==0) {
-      current = substrings[i];
-      testEl.innerHTML = substrings[i] + ((i+1 < substrings.length) ? (' ' + substrings[i+1]) : '');
-      i++;
-    }
-    else {
-      if (testEl.getBBox().width > maxWidth) {
-        testEl.innerHTML = current;
-        output[output.length] = [current, testEl.getBBox()];
-        current = '';
-      }
-      else {
-        current = testEl.innerHTML;
-        if (i+1 < substrings.length) testEl.innerHTML += ' ' + substrings[i+1];
-        i++;
-      }
-    }
-
-  }
-  output[output.length] = [testEl.innerHTML,testEl.getBBox()];
-  testEl.remove();    
-  return output;
-}
 
 const LABEL_WIDTH = 100;
 const LABEL_HEIGHT = 50;
@@ -45,7 +13,6 @@ const LABEL_VERTICAL_SPACING = 15;
 var numIntersections = 0;
 
 function updateNumIntersections() {
-
   var tempRemovedLine = null;
 
   if (currentDraggingLine!=null && currentDraggingLine[1]!=null && currentDraggingLine[2]!=null) {
@@ -88,7 +55,7 @@ function updateNumIntersections() {
 
     var highestLeft = LTop[1];
     var lowestRight = LTop[2];
-    while (highestLeft - deltaL >= 0 && lowestRight + deltaR <= 10) {
+    while (highestLeft - deltaL >= 0 && lowestRight + deltaR <= puzzle.clues.length - 1) {
       highestLeft -= deltaL;
       lowestRight += deltaR;
     }
@@ -96,7 +63,6 @@ function updateNumIntersections() {
     return [deltaL, deltaR, highestLeft, lowestRight]
   }
 
-  seenPairings = [];
   jointIntersections = [];
 
   for (var i=0; i<lineEls.length; i++) {
@@ -106,7 +72,6 @@ function updateNumIntersections() {
 
       if ( i!=j
         && lineA!=null && lineB!=null
-        && !seenPairings.includes(j*12 + i)
         && ((lineA[1] < lineB[1] && lineA[2] > lineB[2]) || (lineA[1] > lineB[1] && lineA[2] < lineB[2]))
       ) {
 
@@ -123,13 +88,14 @@ function updateNumIntersections() {
         }
         if (!jointIntersection) {
           numIntersections++;
-          seenPairings.push(i*12 + j);
           jointIntersections.push (standardisedIntersection);
         }
       }
     }
   }
-  XCounter.innerHTML = "X = " + numIntersections; 
+
+  if (XCounter!=null) XCounter.innerHTML = "X = " + numIntersections; 
+
   if (currentDraggingLine!=null && currentDraggingLine[1]!=null && currentDraggingLine[2]!=null) {
     lineEls.pop(); //remove the temp. added currentDraggingLine
     if (tempRemovedLine!=null) {
@@ -138,72 +104,20 @@ function updateNumIntersections() {
   }
 }
 
-var clueEls = [];
-var answerEls = [];
-var lineEls = [];
-var pencilLineEls = [];
+
+var puzzle = CONTENT.tutorial;
+
+var lineEls;
+var pencilLineEls;
+var XCounter;
+var numAttempts;
 
 var pencilMode = true;
 
 var currentDraggingLine;
 
-function addLabel(x, y, text, isLeft, i) {
-  var lines = wrapText(text,LABEL_WIDTH);
-
-  var textHeight = 3;
-  lines.forEach((line) => { textHeight += line[1].height-3; })
-
-  var yTracker = y + (LABEL_HEIGHT-textHeight)/2 + lines[0][1].height*0.75;
-  var firstTextEl; var lastTextEl;
-
-  lines.forEach((line) => {
-    var lineText = line[0]; var bBox = line[1];
-    textEl = addSVGElement('text', {"class":"labelText", x:x + (LABEL_WIDTH-bBox.width)/2, y:yTracker});
-    if (firstTextEl==null) firstTextEl = textEl;
-    textEl.innerHTML = lineText;
-    yTracker += bBox.height - 3;
-  });
-
-  backgroundEl = document.createElementNS(svgNS, 'rect');
-  if (isLeft) clueEls[i] = backgroundEl;
-  else answerEls[i] = backgroundEl;
-
-  setAttributes(backgroundEl, {"class":"labelBackground", "x":x - PADDING_X, "y":y, "width":LABEL_WIDTH + PADDING_X*2, "height": LABEL_HEIGHT});
-  svg.insertBefore(backgroundEl, firstTextEl);
-
-  if (isLeft) addDot(x + LABEL_WIDTH + PADDING_X + DOT_RADIUS, y + LABEL_HEIGHT/2, true, i)
-  else addDot(x - DOT_RADIUS*2, y + LABEL_HEIGHT/2, false, i)
-}
-
-
-function addDot(x,y,isLeft, i) {
-  dotEl = addSVGElement('circle', {"class":"dot", cx:x, cy:y, r:DOT_RADIUS});
-}
-
-function addSVGElement(name, attrs ){
-  var el = document.createElementNS(svgNS,name); //We need to add the elements to the same XML Namespace for SVG, otherwise they won't show up
-  setAttributes(el, attrs);
-  return svg.appendChild(el);
-}
-
-function setAttributes(el, attrs) {
-  for (var attr in attrs)el.setAttribute(attr,attrs[attr]);
-}
-
-addSVGElement('rect', {x:"0", y:"0", width:"500", height:"920", "class":"background"});
-
 function getLabelX(i, isLeft) {return isLeft ? 10 : 320; }
 function getLabelY(i, isLeft) {return  5 + i * (LABEL_HEIGHT + LABEL_VERTICAL_SPACING); }
-
-for (var i=0; i<12; i++) {
-  if (clues[i]!='')   addLabel(getLabelX(i, true), getLabelY(i, true), clues[i], true, i);
-  if (answers[i]!='') addLabel(getLabelX(i, false), getLabelY(i, false), answers[i], false, i);
-}
-
-var XCounter = addSVGElement('text', {"class":"xCounterText", x: 27 , y: 745 });
-XCounter.innerHTML = "X = 0"; 
-
-addSVGElement('text', {"class":"xCounterTextSubtitle", x: 0 , y: 767 }).innerHTML = "(num. intersections)"; 
 
 var mouseDown = false;
 addEventListener("mouseup", (event) => {
@@ -243,8 +157,8 @@ var lastWasSnapped = false;
 
 function isMouseSelectingLabel(x, y, i, isLeft) {
   var lX = getLabelX(i, isLeft); var lY = getLabelY(i, isLeft);
-  if (isLeft)   return i>=0 && i<=10 && y >=lY - LABEL_VERTICAL_SPACING/2 && x <= lX + LABEL_WIDTH + PADDING_X + DOT_RADIUS*3 && y <= lY + LABEL_HEIGHT + LABEL_VERTICAL_SPACING/2;
-  else return i>=1 && i<=11 && x >= lX - PADDING_X - DOT_RADIUS*3 && y >=lY - LABEL_VERTICAL_SPACING/2 && y <= lY + LABEL_HEIGHT + LABEL_VERTICAL_SPACING/2;
+  if (isLeft)   return i>=0 && i<puzzle.clues.length && puzzle.clues[i]!=null && y >=lY - LABEL_VERTICAL_SPACING/2 && x <= lX + LABEL_WIDTH + PADDING_X + DOT_RADIUS*3 && y <= lY + LABEL_HEIGHT + LABEL_VERTICAL_SPACING/2;
+  else return i>=0 && i<puzzle.clues.length  && puzzle.answers[i]!=null && x >= lX - PADDING_X - DOT_RADIUS*3 && y >=lY - LABEL_VERTICAL_SPACING/2 && y <= lY + LABEL_HEIGHT + LABEL_VERTICAL_SPACING/2;
 
 }
 
@@ -253,12 +167,4 @@ function getLabelConnectorPosition(i, isLeft) {
   else return [getLabelX(i, isLeft) - DOT_RADIUS*2, getLabelY(i, isLeft) + LABEL_HEIGHT/2]
 }
 
-
-
-/*
-- X counter
-- dotted/final line toggle
-- check button & reasons for wrong popup
-- how to play button popup
-
-*/
+loadPuzzle('tutorial');

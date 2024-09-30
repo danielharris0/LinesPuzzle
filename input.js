@@ -5,7 +5,7 @@ function onDrag(x, y) {
       point = point.matrixTransform(svg.getScreenCTM().inverse());
       var isLeft = currentDraggingLine[1]==null;
   
-      for (var i=0; i<12; i++) {
+      for (var i=0; i<puzzle.clues.length; i++) {
         if (isMouseSelectingLabel(point.x, point.y, i, isLeft)) {
           var position = getLabelConnectorPosition(i, isLeft);
   
@@ -42,7 +42,7 @@ function onDrag(x, y) {
   }
 
   function onDragStart(x, y) {
-    for (var i=0; i<12; i++) {
+    for (var i=0; i<puzzle.clues.length; i++) {
       for (var j=0; j<2; j++) {
         var isLeft = j==0;
         if (isMouseSelectingLabel(x,y, i, isLeft)) {
@@ -74,7 +74,7 @@ function onDrag(x, y) {
       var y = currentDraggingLine[0].getAttribute('y2');
       var isLeft = currentDraggingLine[1]==null;
   
-      for (var i=0; i<12; i++) {
+      for (var i=0; i<puzzle.clues.length; i++) {
   
         if (isMouseSelectingLabel(x,y,i,isLeft)) {
   
@@ -139,19 +139,40 @@ function onDrag(x, y) {
   }
 
   function checkButtonPressed() {
-    if (lineEls.length<11) {
+    if (lineEls.length<puzzle.numLines) {
       window.alert("Connect every clue before checking your answer." + (pencilMode ? "\n\nBe sure to use \"Answer Mode\" (solid lines instead of dashed pencil). Exit \"Penil Mode\" by pressing the top \"Pencil Mode\" label." : ""));
     } else {
+
+      if (numAttempts==0) {
+        if (!window.confirm("Are you sure you want to check your answers?\nThis will increase your attempts counter.")) return;
+      }
+
+      numAttempts++;
+
+      document.getElementById('attemptsCounter').innerHTML = "Attempts: " + numAttempts;
+
       var incorrect = []
       lineEls.forEach((lineEl) => {
-        var correct = false;
-        for (var i=0; i<solution.length; i++) {
-          if (lineEl[1]!=10 && solution[i][0]==lineEl[1] && solution[i][1]==lineEl[2]) correct = true;
-          //Or... could be correct X
-          if (lineEl[1]==10 && lineEl[2]==10 && numIntersections%2==0) correct = true;
-          if (lineEl[1]==10 && lineEl[2]==9 && Number.isInteger(Math.sqrt(numIntersections))) correct = true;
 
+        var correct = false;
+
+        if (puzzle.counter!=null && lineEl[1]==puzzle.counter.id) { //If line connects to the 'X' label
+          for (var i=0; i<puzzle.predicates.length; i++) {
+            if (lineEl[2] == puzzle.predicates[i].id && puzzle.predicates[i].function(numIntersections)) {
+              correct = true;
+              break;
+            }
+          }
+        } else { //Otherwise check normal trivia
+          for (var i=0; i<puzzle.clueSolutions.length; i++) {
+            var L = puzzle.clueSolutions[i][0]; var R = puzzle.clueSolutions[i][1];
+            if (L==lineEl[1] && R==lineEl[2]) {
+              correct = true;
+              break;
+            }
+          }
         }
+
         if (!correct) incorrect.push([lineEl[0], lineEl[1], lineEl[2]])
       });
 
