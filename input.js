@@ -168,7 +168,7 @@ function onDrag(x, y) {
 
   function checkButtonPressed() {
     if (lineEls.length<puzzle.numLines) {
-      window.alert("Connect every clue before checking your answer." + (pencilMode ? "\n\nBe sure to use \"Answer Mode\" (solid lines instead of dashed pencil). Exit \"Penil Mode\" by pressing the top \"Pencil Mode\" label." : ""));
+      window.alert("Connect every clue before checking your answer." + (pencilMode ? "\n\nBe sure to use \"Answer Mode\" (not \"Pencil Mode\") to enter your final solution." : ""));
     } else {
 
       if (!inTutorial && numAttempts==0) {
