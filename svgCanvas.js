@@ -80,8 +80,9 @@ function loadPuzzle(name) {
     pencilLineEls = [];
     currentDraggingLine = null;
     numAttempts = 0;
+    inTutorial = false;
 
-
+    document.getElementById('helpButton').innerHTML = "Help";
     document.getElementById('attemptsCounter').innerHTML = "Attempts: " + numAttempts;
 
     //Recreate svg elements

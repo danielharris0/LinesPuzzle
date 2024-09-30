@@ -87,3 +87,8 @@ svg {
 .pencilLine {stroke:#8e95d1; stroke-width:1.5px; stroke-linecap:round; stroke-dasharray: 8;}
 .xCounterText {font-size: 1.8em; font-weight: 600; user-select: none;}
 .xCounterTextSubtitle {font-size: 0.9em; font-weight: 500; user-select: none;}
+
+.tutorialTitle {font-size: 2em; font-weight: 600; user-select: none;}
+.tutorialText {font-size: 1em; font-weight: 600; user-select: none;}
+.dividingLine {stroke:#000; stroke-width:2px; stroke-linecap:round; }
+.tutorialBox {fill: rgb(211, 212, 224); stroke-width: 5; stroke: rgb(189, 189, 209); stroke-linejoin:round; }

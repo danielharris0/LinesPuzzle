@@ -125,6 +125,14 @@ function onDrag(x, y) {
     currentDraggingLine = null;
   }
 
+  function helpButtonPressed() {
+    if (inTutorial) {
+      loadPuzzle('puzzle1');
+    } else {
+      startTutorial();
+    }
+  }
+
   function modeSwitchButtonPressed() {
     pencilMode = !pencilMode;
     var button = document.getElementById('modeSwitchButton');

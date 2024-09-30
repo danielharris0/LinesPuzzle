@@ -167,4 +167,3 @@ function getLabelConnectorPosition(i, isLeft) {
   else return [getLabelX(i, isLeft) - DOT_RADIUS*2, getLabelY(i, isLeft) + LABEL_HEIGHT/2]
 }
 
-loadPuzzle('tutorial');
