@@ -77,45 +77,53 @@ function onDrag(x, y) {
       for (var i=0; i<puzzle.clues.length; i++) {
   
         if (isMouseSelectingLabel(x,y,i,isLeft)) {
-  
-        //Remove existing connections
-          var connectedLineID = getConnectedLine(i, isLeft);
-          if (!pencilMode && connectedLineID!=null) {           
-            for (var j=0; j<lineEls.length; j++) {
-              if (isLeft && lineEls[j][1]==i) {lineEls[j][0].remove(); lineEls.splice(j,1); break;}
-              if (!isLeft && lineEls[j][2]==i) {lineEls[j][0].remove(); lineEls.splice(j,1); break;}
-            }
-          }
-  
-          var position = getLabelConnectorPosition(i, isLeft);
-          currentDraggingLine[0].setAttribute('x2', position[0]);
-          currentDraggingLine[0].setAttribute('y2', position[1]);
-  
-          //Add to lines
-          if (!pencilMode) {
-            if (isLeft) lineEls[lineEls.length] = [currentDraggingLine[0], i, currentDraggingLine[2]];
-            else lineEls[lineEls.length] = [currentDraggingLine[0], currentDraggingLine[1], i];
-    
-            updateNumIntersections();
-          } else {
-            var left = currentDraggingLine[1]; var right = i;
-            if (isLeft) {left = i; right = currentDraggingLine[2];}
 
-            var found = false;
-            for (var j=0; j<pencilLineEls.length; j++) {
-              if (pencilLineEls[j][1] == left && pencilLineEls[j][2]==right) {
-                pencilLineEls[j][0].remove();
-                pencilLineEls.splice(j,1);
-                found = true;
-                currentDraggingLine[0].remove();
-                break;
+          var L = i; var R = currentDraggingLine[2];
+          if (!isLeft) {L = currentDraggingLine[1]; R= i;}
+
+          if (inTutorial && !isTriviaCorrect(L,R)) {
+            window.alert("===Tutorial===\n\"" + puzzle.answers[R] + "\" does not answer \"" + puzzle.clues[L] + "\"\n\nThis is not a possible connection.");
+          } else {
+            //Remove existing connections
+            var connectedLineID = getConnectedLine(i, isLeft);
+            if (!pencilMode && connectedLineID!=null) {           
+              for (var j=0; j<lineEls.length; j++) {
+                if (isLeft && lineEls[j][1]==i) {lineEls[j][0].remove(); lineEls.splice(j,1); break;}
+                if (!isLeft && lineEls[j][2]==i) {lineEls[j][0].remove(); lineEls.splice(j,1); break;}
               }
             }
 
-            if (!found) pencilLineEls[pencilLineEls.length] = [currentDraggingLine[0], left, right];
-          }
-          currentDraggingLine = null;
-          return; 
+            var position = getLabelConnectorPosition(i, isLeft);
+            currentDraggingLine[0].setAttribute('x2', position[0]);
+            currentDraggingLine[0].setAttribute('y2', position[1]);
+
+            //Add to lines
+            if (!pencilMode) {
+
+              lineEls[lineEls.length] = [currentDraggingLine[0], L, R];
+      
+              updateNumIntersections();
+            } else {
+              var left = currentDraggingLine[1]; var right = i;
+              if (isLeft) {left = i; right = currentDraggingLine[2];}
+
+              var found = false;
+              for (var j=0; j<pencilLineEls.length; j++) {
+                if (pencilLineEls[j][1] == left && pencilLineEls[j][2]==right) {
+                  pencilLineEls[j][0].remove();
+                  pencilLineEls.splice(j,1);
+                  found = true;
+                  currentDraggingLine[0].remove();
+                  break;
+                }
+              }
+
+              if (!found) pencilLineEls[pencilLineEls.length] = [currentDraggingLine[0], left, right];
+            }
+            currentDraggingLine = null;
+            return; 
+              }
+
         }
       }
   
@@ -126,24 +134,36 @@ function onDrag(x, y) {
   }
 
   function helpButtonPressed() {
-    if (inTutorial) {
-      loadPuzzle('puzzle1');
+    if (inTutorial ) {
+      if (window.confirm("Sure you want to skip the tutorial?")) endTutorial();
     } else {
       startTutorial();
     }
   }
 
   function modeSwitchButtonPressed() {
-    pencilMode = !pencilMode;
-    var button = document.getElementById('modeSwitchButton');
-    if (pencilMode)  {
-      button.innerHTML = 'Pencil Mode';
-      button.setAttribute('class','dashedButton');
+    if (inTutorial && pencilMode && pencilLineEls.length!=puzzle.numPossibleLines) {
+      window.alert("===Tutorial===\nYou have not marked all possible connections.\n\nThis tutorial will not let you progress until you do.")
+    } else {
+      pencilMode = !pencilMode;
+      var button = document.getElementById('modeSwitchButton');
+      if (pencilMode)  {
+        button.innerHTML = 'Pencil Mode';
+        button.setAttribute('class','dashedButton');
+      }
+      else {
+        document.getElementById('modeSwitchButton').innerHTML = 'Answer Mode';
+        button.setAttribute('class','solidButton');
+      }
     }
-    else {
-      document.getElementById('modeSwitchButton').innerHTML = 'Answer Mode';
-      button.setAttribute('class','solidButton');
+  }
+
+  function isTriviaCorrect(l, r) {
+    for (var i=0; i<puzzle.clueSolutions.length; i++) {
+      var L = puzzle.clueSolutions[i][0]; var R = puzzle.clueSolutions[i][1];
+      if (L==l && R==r)  return true;
     }
+    return false;
   }
 
   function checkButtonPressed() {
@@ -151,7 +171,7 @@ function onDrag(x, y) {
       window.alert("Connect every clue before checking your answer." + (pencilMode ? "\n\nBe sure to use \"Answer Mode\" (solid lines instead of dashed pencil). Exit \"Penil Mode\" by pressing the top \"Pencil Mode\" label." : ""));
     } else {
 
-      if (numAttempts==0) {
+      if (!inTutorial && numAttempts==0) {
         if (!window.confirm("Are you sure you want to check your answers?\nThis will increase your attempts counter.")) return;
       }
 
@@ -171,15 +191,7 @@ function onDrag(x, y) {
               break;
             }
           }
-        } else { //Otherwise check normal trivia
-          for (var i=0; i<puzzle.clueSolutions.length; i++) {
-            var L = puzzle.clueSolutions[i][0]; var R = puzzle.clueSolutions[i][1];
-            if (L==lineEl[1] && R==lineEl[2]) {
-              correct = true;
-              break;
-            }
-          }
-        }
+        } else correct = isTriviaCorrect(lineEl[1], lineEl[2]); //Otherwise check normal trivia     
 
         if (!correct) incorrect.push([lineEl[0], lineEl[1], lineEl[2]])
       });
@@ -190,6 +202,8 @@ function onDrag(x, y) {
 
       if (incorrect.length==0) {
         window.alert("Well done!")
+
+        if (inTutorial) endTutorial();
       }
     }
   }

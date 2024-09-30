@@ -1,5 +1,6 @@
 const CONTENT = {
   tutorial : {
+      numPossibleLines: 5,
       numLines : 3,
       hints : [
           "Draw a straight line from each clue (left) to an answer (right).",

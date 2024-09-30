@@ -1,5 +1,10 @@
 var inTutorial;
 
+function endTutorial() {
+    loadPuzzle('puzzle1');
+    window.alert("Final Tips:\n\n- Erase a pencil line by drawing back over it in pencil\n- Press Help to return to the tutorial")
+}
+
 function startTutorial() {
     loadPuzzle('tutorial');
     inTutorial = true;
