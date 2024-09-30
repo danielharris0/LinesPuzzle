@@ -197,7 +197,7 @@ function onDrag(x, y) {
       });
 
       incorrect.forEach((lineEl) => {
-        lineEl[0].animate([{stroke: "red"}, {stroke:"black"}], {duration: 250,iterations: 10})
+        lineEl[0].animate([{stroke: "red"},{stroke: "red"}, {stroke:"black"}], {duration: 250,iterations: 20})
       });
 
       if (incorrect.length==0) {
