@@ -82,7 +82,7 @@ function onDrag(x, y) {
           if (!isLeft) {L = currentDraggingLine[1]; R= i;}
 
           if (inTutorial && !isTriviaCorrect(L,R)) {
-            window.alert("===Tutorial===\n\"" + puzzle.answers[R] + "\" does not answer \"" + puzzle.clues[L] + "\"\n\nThis is not a possible connection.");
+            window.alert("Hint: \"" + puzzle.answers[R] + "\" cannot answer \"" + puzzle.clues[L].toLowerCase() + "\"\n\n(You don't get hints in the real puzzle)");
           } else {
             //Remove existing connections
             var connectedLineID = getConnectedLine(i, isLeft);
