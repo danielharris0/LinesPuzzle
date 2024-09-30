@@ -12,7 +12,9 @@ function startTutorial() {
     document.getElementById('helpButton').innerHTML = "Skip";
 
     addSVGElement('rect', {"class":"tutorialBox", x: 5 , y: 250, width: 420, height:470 });
-    
+    addSVGElement('text', {"class":"tutorialText", x: 390 , y: 270, style:'font-size:0.6em' }).innerHTML = "V0.5"; 
+
+
     addSVGElement('text', {"class":"tutorialTitle", x: 20 , y: 300 }).innerHTML = "Welcome!"; 
     addSVGElement('text', {"class":"tutorialText", x: 20 , y: 340 }).innerHTML = "This is a word puzzle."; 
     addSVGElement('text', {"class":"tutorialText", x: 20 , y: 360 }).innerHTML = "Goal: Connect each clue (left) to one answer (right)."; 
