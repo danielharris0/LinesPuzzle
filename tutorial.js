@@ -12,7 +12,7 @@ function startTutorial() {
     document.getElementById('helpButton').innerHTML = "Skip";
 
     addSVGElement('rect', {"class":"tutorialBox", x: 5 , y: 250, width: 420, height:470 });
-    addSVGElement('text', {"class":"tutorialText", x: 390 , y: 270, style:'font-size:0.6em' }).innerHTML = "V0.7"; 
+    addSVGElement('text', {"class":"tutorialText", x: 390 , y: 270, style:'font-size:0.6em' }).innerHTML = "V0.8"; 
 
 
     addSVGElement('text', {"class":"tutorialTitle", x: 20 , y: 300 }).innerHTML = "Practice Puzzle!"; 
